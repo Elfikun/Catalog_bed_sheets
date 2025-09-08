@@ -1,3 +1,53 @@
+// Функция для получения данных продуктов из HTML
+function getProductsFromHTML() {
+	const productElements = document.querySelectorAll(".product-item");
+	const products = [];
+
+	productElements.forEach((element) => {
+		products.push({
+			id: parseInt(element.dataset.id),
+			name: element.dataset.name,
+			price: parseInt(element.dataset.price),
+			image: element.dataset.image,
+			category: element.dataset.category,
+			description: element.dataset.description,
+		});
+	});
+
+	return products;
+}
+
+// Глобальная переменная для хранения продуктов
+let products = [];
+
+// Функция для отображения продуктов
+function displayProducts(category = "all") {
+	const productsGrid = document.getElementById("productsGrid");
+	productsGrid.innerHTML = "";
+
+	const filteredProducts =
+		category === "all"
+			? products
+			: products.filter((product) => product.category === category);
+
+	filteredProducts.forEach((product) => {
+		const productCard = document.createElement("div");
+		productCard.className = "product-card";
+		productCard.innerHTML = `
+            <img src="${product.image}" alt="${product.name}" class="product-image">
+            <div class="product-content">
+                <h3 class="product-title">${product.name}</h3>
+                <p class="product-description">${product.description}</p>
+                <div class="product-footer">
+                    <span class="product-price">${product.price} ₽</span>
+                    <button class="product-btn">Подробнее</button>
+                </div>
+            </div>
+        `;
+		productsGrid.appendChild(productCard);
+	});
+}
+
 // Мобильное меню
 const menuToggle = document.getElementById("menuToggle");
 const mobileMenu = document.getElementById("mobileMenu");
@@ -21,19 +71,27 @@ if (menuToggle && mobileMenu) {
 }
 
 // Категории каталога
-const categoryButtons = document.querySelectorAll(".category-btn");
+document.addEventListener("DOMContentLoaded", () => {
+	// Загружаем продукты из HTML
+	products = getProductsFromHTML();
 
-categoryButtons.forEach((button) => {
-	button.addEventListener("click", () => {
-		// Удалить активный класс со всех кнопок
-		categoryButtons.forEach((btn) => btn.classList.remove("active"));
+	// Отображаем все продукты при загрузке
+	displayProducts("all");
 
-		// Добавить активный класс к нажатой кнопке
-		button.classList.add("active");
+	const categoryButtons = document.querySelectorAll(".category-btn");
 
-		// Получить категорию и отобразить продукты
-		const category = button.getAttribute("data-category");
-		displayProducts(category);
+	categoryButtons.forEach((button) => {
+		button.addEventListener("click", () => {
+			// Удалить активный класс со всех кнопок
+			categoryButtons.forEach((btn) => btn.classList.remove("active"));
+
+			// Добавить активный класс к нажатой кнопке
+			button.classList.add("active");
+
+			// Получить категорию и отобразить продукты
+			const category = button.getAttribute("data-category");
+			displayProducts(category);
+		});
 	});
 });
 

@@ -6,11 +6,85 @@
 		<title>Linen House - Премиальное постельное белье</title>
 		<link rel="stylesheet" href="css/style.css" />
 		<link rel="stylesheet" href="css/responsive.css" />
-
-		<script src="script/app.js" defer></script>
 		<script src="script/main.js" defer></script>
 	</head>
 	<body>
+		<!-- Скрытый контейнер с данными продуктов -->
+		<div id="products-data" style="display: none">
+			<div
+				class="product-item"
+				data-id="1"
+				data-name="Премиум простыня"
+				data-price="2800"
+				data-image="https://placehold.co/300x300/f8f6f3/e2e0dd?text=Простыня"
+				data-category="sheets"
+				data-description="100% хлопок, плотность 200 г/м², размер 200x220 см"
+			></div>
+			<div
+				class="product-item"
+				data-id="2"
+				data-name="Льняная простыня"
+				data-price="3500"
+				data-image="https://placehold.co/300x300/ece9e6/d6d3d0?text=Лен"
+				data-category="sheets"
+				data-description="Натуральный лен, легкая текстура, размер 180x200 см"
+			></div>
+			<div
+				class="product-item"
+				data-id="3"
+				data-name="Подушка Memory Foam"
+				data-price="1800"
+				data-image="https://placehold.co/300x300/f5f3f0/e0ddd9?text=Подушка"
+				data-category="pillows"
+				data-description="Ортопедическая подушка с эффектом памяти, 50x70 см"
+			></div>
+			<div
+				class="product-item"
+				data-id="4"
+				data-name="Шелковая подушка"
+				data-price="2200"
+				data-image="https://placehold.co/300x300/f9f7f4/e3e1dd?text=Шелк"
+				data-category="pillows"
+				data-description="Наполнение шелковыми волокнами, чехол из шелка 22 мкм"
+			></div>
+			<div
+				class="product-item"
+				data-id="5"
+				data-name="Облегченное одеяло"
+				data-price="3200"
+				data-image="https://placehold.co/300x300/f2efe9/dcd8d2?text=Одеяло"
+				data-category="blankets"
+				data-description="Наполнитель холлофайбер, вес 1.2 кг, размер 140x205 см"
+			></div>
+			<div
+				class="product-item"
+				data-id="6"
+				data-name="Зимнее одеяло"
+				data-price="4500"
+				data-image="https://placehold.co/300x300/eae7e1/d4d0cb?text=Зимнее"
+				data-category="blankets"
+				data-description="Натуральный пух, двойной слой, размер 160x210 см"
+			></div>
+			<div
+				class="product-item"
+				data-id="7"
+				data-name='Комплект "Роскошь"'
+				data-price="6800"
+				data-image="https://placehold.co/300x300/f7f5f1/e1deda?text=Комплект"
+				data-category="sets"
+				data-description="Простыня, пододеяльник, 2 наволочки, 100% хлопок"
+			></div>
+			<div
+				class="product-item"
+				data-id="8"
+				data-name="Банный комплект"
+				data-price="2400"
+				data-image="https://placehold.co/300x300/f0ede9/dad6d1?text=Полотенца"
+				data-category="towels"
+				data-description="2 полотенца 70x140 см, 1 банное 90x170 см, хлопок 100%"
+			></div>
+		</div>
+
 		<!-- Header -->
 		<header class="header">
 			<div class="container">
@@ -28,6 +102,7 @@
 					</nav>
 					<div class="header-contact">
 						<span class="phone">+7 (495) 123-45-67</span>
+						<button class="callback-btn">Заказать звонок</button>
 						<button class="menu-toggle" id="menuToggle">
 							<svg
 								width="24"
@@ -64,10 +139,10 @@
 							Премиальное постельное белье из натуральных материалов. Создано
 							для тех, кто ценит комфорт, качество и эстетику.
 						</p>
-						<!-- <div class="hero-buttons">
-							<button class="btn-primary">Каталог</button>
-							<button class="btn-secondary">О компании</button>
-						</div> -->
+						<div class="hero-buttons">
+							<a href="#catalog" class="btn-primary">Каталог</a>
+							<a href="#about" class="btn-secondary">О компании</a>
+						</div>
 					</div>
 					<div class="hero-image">
 						<img
