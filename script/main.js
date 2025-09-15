@@ -4,14 +4,28 @@ function getProductsFromHTML() {
 	const products = [];
 
 	productElements.forEach((element) => {
+		let galleryImages = [];
+		try {
+			galleryImages = JSON.parse(element.dataset.galleryImages || "[]");
+		} catch (e) {
+			console.error("Error parsing gallery images:", e);
+		}
+
 		products.push({
 			id: parseInt(element.dataset.id),
 			name: element.dataset.name,
 			price: parseInt(element.dataset.price),
 			image: element.dataset.image,
-			hoverImage: element.dataset.hoverImage || element.dataset.image, // Используем основное изображение, если hoverImage отсутствует
+			hoverImage: element.dataset.hoverImage || element.dataset.image,
+			galleryImages:
+				galleryImages.length > 0 ? galleryImages : [element.dataset.image],
 			category: element.dataset.category,
 			description: element.dataset.description,
+			detailedDescription:
+				element.dataset.detailedDescription || element.dataset.description,
+			characteristics: element.dataset.characteristics
+				? JSON.parse(element.dataset.characteristics)
+				: {},
 		});
 	});
 
@@ -45,7 +59,7 @@ function displayProducts(category = "all") {
                 <p class="product-description">${product.description}</p>
                 <div class="product-footer">
                     <span class="product-price">${product.price} ₽</span>
-                    <button class="product-btn">Подробнее</button>
+                    <button class="product-btn" data-product-id="${product.id}">Подробнее</button>
                 </div>
             </div>
         `;
@@ -61,7 +75,123 @@ function displayProducts(category = "all") {
 				productImage.src = product.image;
 			});
 		}
+
+		// Обработчик для кнопки "Подробнее"
+		const detailsBtn = productCard.querySelector(".product-btn");
+		if (detailsBtn) {
+			detailsBtn.addEventListener("click", () => {
+				showProductModal(product);
+			});
+		}
 	});
+}
+
+// Функция для показа модального окна
+function showProductModal(product) {
+	// Создаем модальное окно динамически
+	const modal = document.createElement("div");
+	modal.className = "modal";
+	modal.innerHTML = `
+		<div class="modal-content">
+			<span class="modal-close">&times;</span>
+			<h2 class="modal-title">${product.name}</h2>
+			<div class="modal-gallery-container">
+				<button class="gallery-prev">◄</button>
+				<div class="modal-gallery">
+					${product.galleryImages
+						.map(
+							(img) => `
+						<img src="${img}" alt="${product.name}" class="gallery-image" loading="lazy">
+					`
+						)
+						.join("")}
+				</div>
+				<button class="gallery-next">►</button>
+				<div class="gallery-dots">
+					${product.galleryImages
+						.map(
+							(_, index) => `
+						<span class="gallery-dot" data-index="${index}"></span>
+					`
+						)
+						.join("")}
+				</div>
+			</div>
+			<p class="modal-description">${product.detailedDescription}</p>
+			<div class="modal-characteristics">
+				<h3>Характеристики:</h3>
+				<ul>
+					${Object.entries(product.characteristics)
+						.map(
+							([key, value]) => `
+						<li><strong>${key}:</strong> ${value}</li>
+					`
+						)
+						.join("")}
+				</ul>
+			</div>
+			<div class="modal-price">${product.price} ₽</div>
+		</div>
+	`;
+
+	document.body.appendChild(modal);
+
+	// Показываем модал
+	modal.style.display = "flex";
+
+	// Закрытие модала
+	const closeBtn = modal.querySelector(".modal-close");
+	closeBtn.addEventListener("click", () => {
+		modal.remove();
+	});
+
+	// Закрытие по клику вне модала
+	modal.addEventListener("click", (e) => {
+		if (e.target === modal) {
+			modal.remove();
+		}
+	});
+
+	// Закрытие по Esc
+	document.addEventListener(
+		"keydown",
+		(e) => {
+			if (e.key === "Escape" && modal.style.display === "flex") {
+				modal.remove();
+			}
+		},
+		{ once: true }
+	);
+
+	// Навигация галереи
+	const gallery = modal.querySelector(".modal-gallery");
+	const prevBtn = modal.querySelector(".gallery-prev");
+	const nextBtn = modal.querySelector(".gallery-next");
+	if (gallery && prevBtn && nextBtn) {
+		prevBtn.addEventListener("click", () => {
+			gallery.scrollBy({ left: -300, behavior: "smooth" });
+		});
+		nextBtn.addEventListener("click", () => {
+			gallery.scrollBy({ left: 300, behavior: "smooth" });
+		});
+	}
+
+	// Обновление индикатора точек
+	const dots = modal.querySelectorAll(".gallery-dot");
+	if (dots.length > 0) {
+		const updateActiveDot = () => {
+			const scrollLeft = gallery.scrollLeft;
+			const imageWidth =
+				gallery.querySelector(".gallery-image").offsetWidth + 10; // +gap
+			const activeIndex = Math.round(scrollLeft / imageWidth);
+			dots.forEach((dot, index) => {
+				dot.classList.toggle("active", index === activeIndex);
+			});
+		};
+
+		gallery.addEventListener("scroll", updateActiveDot);
+		updateActiveDot(); // Устанавливаем начальное состояние
+	}
 }
 
 // Мобильное меню
