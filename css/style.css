@@ -38,11 +38,6 @@
 		0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
 	--transition: all 0.3s ease;
-	--font-light: 300;
-	--font-normal: 400;
-	--font-medium: 500;
-	--font-semibold: 600;
-	--font-bold: 700;
 }
 
 * {
@@ -293,8 +288,8 @@ body {
 }
 
 .hero-image img {
-	width: 100%;
-	border-radius: 12px;
+	width: 70%;
+	border-radius: var(--border-radius);
 	box-shadow: var(--shadow-xl);
 }
 
@@ -829,7 +824,7 @@ body {
 	border: none;
 	padding: 7.5px;
 	font-size: 1.5rem;
-	font-weight: var(--font-light);
+	font-weight: 300;
 	cursor: pointer;
 	border-radius: var(--border-radius);
 	transition: var(--transition);
