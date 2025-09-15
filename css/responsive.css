@@ -62,6 +62,9 @@
 	.gallery-dots {
 		display: block;
 	}
+	.gallery-dots[style*="display: none"] {
+		display: none !important;
+	}
 }
 
 /* Tablet styles */

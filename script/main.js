@@ -53,28 +53,20 @@ function displayProducts(category = "all") {
 		const productCard = document.createElement("div");
 		productCard.className = "product-card";
 		productCard.innerHTML = `
-            <img src="${product.image}" alt="${product.name}" class="product-image" data-hover-image="${product.hoverImage}">
-            <div class="product-content">
-                <h3 class="product-title">${product.name}</h3>
-                <p class="product-description">${product.description}</p>
-                <div class="product-footer">
-                    <span class="product-price">${product.price} ₽</span>
-                    <button class="product-btn" data-product-id="${product.id}">Подробнее</button>
-                </div>
-            </div>
-        `;
+			<div class="product-image-container">
+				<img src="${product.image}" alt="${product.name}" class="product-image main-image">
+				<img src="${product.hoverImage}" alt="${product.name}" class="product-image hover-image">
+			</div>
+			<div class="product-content">
+				<h3 class="product-title">${product.name}</h3>
+				<p class="product-description">${product.description}</p>
+				<div class="product-footer">
+					<span class="product-price">${product.price} ₽</span>
+					<button class="product-btn" data-product-id="${product.id}">Подробнее</button>
+				</div>
+			</div>
+		`;
 		productsGrid.appendChild(productCard);
-
-		// Добавляем обработчики для смены изображения при наведении
-		const productImage = productCard.querySelector(".product-image");
-		if (productImage && product.hoverImage) {
-			productCard.addEventListener("mouseenter", () => {
-				productImage.src = product.hoverImage;
-			});
-			productCard.addEventListener("mouseleave", () => {
-				productImage.src = product.image;
-			});
-		}
 
 		// Обработчик для кнопки "Подробнее"
 		const detailsBtn = productCard.querySelector(".product-btn");
@@ -88,109 +80,112 @@ function displayProducts(category = "all") {
 
 // Функция для показа модального окна
 function showProductModal(product) {
-	// Создаем модальное окно динамически
-	const modal = document.createElement("div");
-	modal.className = "modal";
-	modal.innerHTML = `
-		<div class="modal-content">
-			<span class="modal-close">&times;</span>
-			<h2 class="modal-title">${product.name}</h2>
-			<div class="modal-gallery-container">
-				<button class="gallery-prev">◄</button>
-				<div class="modal-gallery">
-					${product.galleryImages
-						.map(
-							(img) => `
-						<img src="${img}" alt="${product.name}" class="gallery-image" loading="lazy">
-					`
-						)
-						.join("")}
-				</div>
-				<button class="gallery-next">►</button>
-				<div class="gallery-dots">
-					${product.galleryImages
-						.map(
-							(_, index) => `
-						<span class="gallery-dot" data-index="${index}"></span>
-					`
-						)
-						.join("")}
-				</div>
-			</div>
-			<p class="modal-description">${product.detailedDescription}</p>
-			<div class="modal-characteristics">
-				<h3>Характеристики:</h3>
-				<ul>
-					${Object.entries(product.characteristics)
-						.map(
-							([key, value]) => `
-						<li><strong>${key}:</strong> ${value}</li>
-					`
-						)
-						.join("")}
-				</ul>
-			</div>
-			<div class="modal-price">${product.price} ₽</div>
-		</div>
-	`;
+	const modal = document.getElementById("productModal");
+	if (!modal) {
+		console.error("Modal #productModal not found");
+		return;
+	}
 
-	document.body.appendChild(modal);
+	const title = modal.querySelector(".modal-title");
+	const gallery = modal.querySelector(".modal-gallery");
+	const dots = modal.querySelector(".gallery-dots");
+	const description = modal.querySelector(".modal-description");
+	const characteristicsList = modal.querySelector(".modal-characteristics ul");
+	const price = modal.querySelector(".modal-price");
 
-	// Показываем модал
+	title.textContent = product.name;
+	gallery.innerHTML = product.galleryImages
+		.map(
+			(img) => `
+		<img src="${img}" alt="${product.name}" class="gallery-image" loading="lazy">
+	`
+		)
+		.join("");
+	dots.innerHTML = product.galleryImages
+		.map(
+			(_, index) => `
+		<span class="gallery-dot" data-index="${index}" aria-label="Перейти к изображению ${
+				index + 1
+			}"></span>
+	`
+		)
+		.join("");
+	description.textContent = product.detailedDescription;
+	characteristicsList.innerHTML = Object.entries(product.characteristics)
+		.map(
+			([key, value]) => `
+		<li><strong>${key}:</strong> ${value}</li>
+	`
+		)
+		.join("");
+	price.textContent = `${product.price} ₽`;
+
 	modal.style.display = "flex";
 
-	// Закрытие модала
 	const closeBtn = modal.querySelector(".modal-close");
 	closeBtn.addEventListener("click", () => {
-		modal.remove();
+		modal.style.display = "none";
 	});
 
-	// Закрытие по клику вне модала
 	modal.addEventListener("click", (e) => {
 		if (e.target === modal) {
-			modal.remove();
+			modal.style.display = "none";
 		}
 	});
 
-	// Закрытие по Esc
 	document.addEventListener(
 		"keydown",
 		(e) => {
 			if (e.key === "Escape" && modal.style.display === "flex") {
-				modal.remove();
+				modal.style.display = "none";
 			}
 		},
 		{ once: true }
 	);
 
-	// Навигация галереи
-	const gallery = modal.querySelector(".modal-gallery");
 	const prevBtn = modal.querySelector(".gallery-prev");
 	const nextBtn = modal.querySelector(".gallery-next");
 	if (gallery && prevBtn && nextBtn) {
-		prevBtn.addEventListener("click", () => {
-			gallery.scrollBy({ left: -300, behavior: "smooth" });
-		});
-		nextBtn.addEventListener("click", () => {
-			gallery.scrollBy({ left: 300, behavior: "smooth" });
-		});
+		// Скрываем кнопки, если изображений 2 или меньше
+		if (product.galleryImages.length <= 2) {
+			prevBtn.style.display = "none";
+			prevBtn.setAttribute("aria-hidden", "true");
+			nextBtn.style.display = "none";
+			nextBtn.setAttribute("aria-hidden", "true");
+			dots.style.display = "none";
+		} else {
+			prevBtn.style.display = "";
+			prevBtn.removeAttribute("aria-hidden");
+			nextBtn.style.display = "";
+			nextBtn.removeAttribute("aria-hidden");
+			dots.style.display = "";
+			prevBtn.addEventListener("click", () => {
+				gallery.scrollBy({ left: -300, behavior: "smooth" });
+			});
+			nextBtn.addEventListener("click", () => {
+				gallery.scrollBy({ left: 300, behavior: "smooth" });
+			});
+		}
 	}
 
-	// Обновление индикатора точек
-	const dots = modal.querySelectorAll(".gallery-dot");
-	if (dots.length > 0) {
+	const dotElements = modal.querySelectorAll(".gallery-dot");
+	if (dotElements.length > 0) {
 		const updateActiveDot = () => {
 			const scrollLeft = gallery.scrollLeft;
 			const imageWidth =
-				gallery.querySelector(".gallery-image").offsetWidth + 10; // +gap
+				gallery.querySelector(".gallery-image").offsetWidth + 10;
 			const activeIndex = Math.round(scrollLeft / imageWidth);
-			dots.forEach((dot, index) => {
+			dotElements.forEach((dot, index) => {
 				dot.classList.toggle("active", index === activeIndex);
+				dot.setAttribute(
+					"aria-current",
+					index === activeIndex ? "true" : "false"
+				);
 			});
 		};
 
 		gallery.addEventListener("scroll", updateActiveDot);
-		updateActiveDot(); // Устанавливаем начальное состояние
+		updateActiveDot();
 	}
 }
 
@@ -198,49 +193,37 @@ function showProductModal(product) {
 const menuToggle = document.getElementById("menuToggle");
 const mobileMenu = document.getElementById("mobileMenu");
 
-// Проверка существования элементов перед добавлением обработчиков
 if (menuToggle && mobileMenu) {
 	menuToggle.addEventListener("click", () => {
-		const isMenuVisible = mobileMenu.style.display === "block";
-		mobileMenu.style.display = isMenuVisible ? "none" : "block";
-
-		// Добавляем/удаляем класс для анимации
-		if (!isMenuVisible) {
-			mobileMenu.style.opacity = "0";
-			mobileMenu.style.transform = "translateY(-10px)";
-			setTimeout(() => {
-				mobileMenu.style.opacity = "1";
-				mobileMenu.style.transform = "translateY(0)";
-			}, 10);
-		}
+		mobileMenu.classList.toggle("active");
 	});
 }
 
+document.addEventListener("click", (e) => {
+	if (
+		e.target.dataset.closeMenu &&
+		mobileMenu &&
+		mobileMenu.classList.contains("active")
+	) {
+		mobileMenu.classList.remove("active");
+	}
+});
+
 // Категории каталога
 document.addEventListener("DOMContentLoaded", () => {
-	// Загружаем продукты из HTML
 	products = getProductsFromHTML();
-
-	// Отображаем все продукты при загрузке
 	displayProducts("all");
 
 	const categoryButtons = document.querySelectorAll(".category-btn");
-
 	categoryButtons.forEach((button) => {
 		button.addEventListener("click", () => {
-			// Удалить активный класс со всех кнопок
 			categoryButtons.forEach((btn) => btn.classList.remove("active"));
-
-			// Добавить активный класс к нажатой кнопке
 			button.classList.add("active");
-
-			// Получить категорию и отобразить продукты
 			const category = button.getAttribute("data-category");
 			displayProducts(category);
 		});
 	});
 
-	// Обработчик для кнопки "Заказать звонок"
 	const callbackBtn = document.querySelector(".callback-btn");
 	if (callbackBtn) {
 		callbackBtn.addEventListener("click", (e) => {
@@ -256,24 +239,11 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 });
 
-// Плавная прокрутка к секциям
+// Обработка ссылок для закрытия мобильного меню
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-	anchor.addEventListener("click", function (e) {
-		e.preventDefault();
-
-		const targetId = this.getAttribute("href");
-		const targetElement = document.querySelector(targetId);
-
-		if (targetElement) {
-			window.scrollTo({
-				top: targetElement.offsetTop - 80,
-				behavior: "smooth",
-			});
-
-			// Скрыть мобильное меню при клике на ссылку
-			if (mobileMenu && mobileMenu.style.display === "block") {
-				mobileMenu.style.display = "none";
-			}
+	anchor.addEventListener("click", () => {
+		if (mobileMenu && mobileMenu.classList.contains("active")) {
+			mobileMenu.classList.remove("active");
 		}
 	});
 });
@@ -285,13 +255,11 @@ if (contactForm) {
 	contactForm.addEventListener("submit", async (e) => {
 		e.preventDefault();
 
-		// Получаем данные формы
 		const formData = new FormData(contactForm);
 		const name = formData.get("name");
 		const email = formData.get("email");
 		const message = formData.get("message");
 
-		// Формируем текст сообщения для Telegram
 		const telegramMessage = `
 *Новое сообщение с сайта LINEN HOUSE*
 
@@ -303,12 +271,9 @@ if (contactForm) {
 Дата: ${new Date().toLocaleString("ru-RU")}
 `;
 
-		// Ваш Telegram Bot Token (замените на реальный)
 		const botToken = "YOUR_BOT_TOKEN_HERE";
-		// Ваш Chat ID (замените на реальный)
 		const chatId = "YOUR_CHAT_ID_HERE";
 
-		// Проверяем, что токен и chat ID заданы
 		if (botToken === "YOUR_BOT_TOKEN_HERE" || chatId === "YOUR_CHAT_ID_HERE") {
 			alert(
 				"Пожалуйста, настройте Telegram Bot Token и Chat ID в коде main.js"
@@ -348,30 +313,14 @@ if (contactForm) {
 	});
 }
 
-// Закрытие мобильного меню при клике вне его
-document.addEventListener("click", (e) => {
-	if (mobileMenu && menuToggle) {
-		if (
-			mobileMenu.style.display === "block" &&
-			!mobileMenu.contains(e.target) &&
-			e.target !== menuToggle &&
-			!menuToggle.contains(e.target)
-		) {
-			mobileMenu.style.display = "none";
-		}
-	}
-});
-
 // Закрытие мобильного меню при изменении размера окна
 window.addEventListener("resize", () => {
-	if (mobileMenu) {
-		if (window.innerWidth > 768) {
-			mobileMenu.style.display = "none";
-		}
+	if (mobileMenu && window.innerWidth > 768) {
+		mobileMenu.classList.remove("active");
 	}
 });
 
-// Добавляем обработчики для кнопок в hero секции
+// Обработчики кнопок в hero-секции
 document.addEventListener("DOMContentLoaded", () => {
 	const btnPrimary = document.querySelector(".btn-primary");
 	const btnSecondary = document.querySelector(".btn-secondary");
