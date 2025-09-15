@@ -57,7 +57,6 @@
 	.gallery-prev,
 	.gallery-next {
 		display: none;
-		aria-hidden: true;
 	}
 	.gallery-dots {
 		display: block;
