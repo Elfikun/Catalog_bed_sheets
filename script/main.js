@@ -9,6 +9,7 @@ function getProductsFromHTML() {
 			name: element.dataset.name,
 			price: parseInt(element.dataset.price),
 			image: element.dataset.image,
+			hoverImage: element.dataset.hoverImage || element.dataset.image, // Используем основное изображение, если hoverImage отсутствует
 			category: element.dataset.category,
 			description: element.dataset.description,
 		});
@@ -23,6 +24,10 @@ let products = [];
 // Функция для отображения продуктов
 function displayProducts(category = "all") {
 	const productsGrid = document.getElementById("productsGrid");
+	if (!productsGrid) {
+		console.error("Element #productsGrid not found");
+		return;
+	}
 	productsGrid.innerHTML = "";
 
 	const filteredProducts =
@@ -34,7 +39,7 @@ function displayProducts(category = "all") {
 		const productCard = document.createElement("div");
 		productCard.className = "product-card";
 		productCard.innerHTML = `
-            <img src="${product.image}" alt="${product.name}" class="product-image">
+            <img src="${product.image}" alt="${product.name}" class="product-image" data-hover-image="${product.hoverImage}">
             <div class="product-content">
                 <h3 class="product-title">${product.name}</h3>
                 <p class="product-description">${product.description}</p>
@@ -45,6 +50,17 @@ function displayProducts(category = "all") {
             </div>
         `;
 		productsGrid.appendChild(productCard);
+
+		// Добавляем обработчики для смены изображения при наведении
+		const productImage = productCard.querySelector(".product-image");
+		if (productImage && product.hoverImage) {
+			productCard.addEventListener("mouseenter", () => {
+				productImage.src = product.hoverImage;
+			});
+			productCard.addEventListener("mouseleave", () => {
+				productImage.src = product.image;
+			});
+		}
 	});
 }
 
