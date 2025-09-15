@@ -93,6 +93,21 @@ document.addEventListener("DOMContentLoaded", () => {
 			displayProducts(category);
 		});
 	});
+
+	// Обработчик для кнопки "Заказать звонок"
+	const callbackBtn = document.querySelector(".callback-btn");
+	if (callbackBtn) {
+		callbackBtn.addEventListener("click", (e) => {
+			e.preventDefault();
+			const contactsSection = document.getElementById("contacts");
+			if (contactsSection) {
+				window.scrollTo({
+					top: contactsSection.offsetTop - 80,
+					behavior: "smooth",
+				});
+			}
+		});
+	}
 });
 
 // Плавная прокрутка к секциям
@@ -121,12 +136,69 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
 const contactForm = document.getElementById("contactForm");
 
 if (contactForm) {
-	contactForm.addEventListener("submit", (e) => {
+	contactForm.addEventListener("submit", async (e) => {
 		e.preventDefault();
 
-		// Здесь можно добавить логику отправки формы
-		alert("Спасибо за заявку! Мы свяжемся с вами в ближайшее время.");
-		contactForm.reset();
+		// Получаем данные формы
+		const formData = new FormData(contactForm);
+		const name = formData.get("name");
+		const email = formData.get("email");
+		const message = formData.get("message");
+
+		// Формируем текст сообщения для Telegram
+		const telegramMessage = `
+*Новое сообщение с сайта LINEN HOUSE*
+
+👤 Имя: ${name}
+📧 Email: ${email}
+💬 Сообщение: ${message}
+
+---
+Дата: ${new Date().toLocaleString("ru-RU")}
+`;
+
+		// Ваш Telegram Bot Token (замените на реальный)
+		const botToken = "YOUR_BOT_TOKEN_HERE";
+		// Ваш Chat ID (замените на реальный)
+		const chatId = "YOUR_CHAT_ID_HERE";
+
+		// Проверяем, что токен и chat ID заданы
+		if (botToken === "YOUR_BOT_TOKEN_HERE" || chatId === "YOUR_CHAT_ID_HERE") {
+			alert(
+				"Пожалуйста, настройте Telegram Bot Token и Chat ID в коде main.js"
+			);
+			return;
+		}
+
+		try {
+			const response = await fetch(
+				`https://api.telegram.org/bot${botToken}/sendMessage`,
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						chat_id: chatId,
+						text: telegramMessage,
+						parse_mode: "Markdown",
+					}),
+				}
+			);
+
+			const result = await response.json();
+
+			if (result.ok) {
+				alert("Спасибо за заявку! Мы свяжемся с вами в ближайшее время.");
+				contactForm.reset();
+			} else {
+				alert("Ошибка при отправке сообщения. Попробуйте позже.");
+				console.error("Telegram API error:", result);
+			}
+		} catch (error) {
+			alert("Ошибка при отправке сообщения. Попробуйте позже.");
+			console.error("Fetch error:", error);
+		}
 	});
 }
 
